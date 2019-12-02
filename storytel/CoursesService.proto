@@ -1,0 +1,14 @@
+syntax="proto3";
+package storytel;
+
+message CoursesRequest {
+    string userid = 1;
+}
+
+message CoursesResponse {
+    repeated string course = 1;
+}
+
+service CoursesService {
+    rpc Fetch(CoursesRequest) returns (CoursesResponse);
+}
