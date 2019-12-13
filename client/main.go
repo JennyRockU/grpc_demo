@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"../api"
+	"../storytel"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -12,19 +12,18 @@ import (
 func main() {
 	var conn *grpc.ClientConn
 
-	conn, err := grpc.Dial(":7777", grpc.WithInsecure())
+	conn, err := grpc.Dial(":8080", grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("could not connect: %s", err)
+		log.Fatalf("error when establishing connectison: %s", err)
 	}
 	defer conn.Close()
 
-	c := api.NewPingClient(conn)
+	client := storytel.NewCoursesServiceClient(conn)
 
-	response, err := c.SayHello(context.Background(), &api.PingMessage{Greeting: "foo"})
+	response, err := client.Fetch(context.Background(), &storytel.CoursesRequest{Userid: "7622327"})
 	if err != nil {
-		log.Fatalf("error when calling SayHello: %s", err)
+		log.Fatalf("error when calling Fetch courses: %s", err)
 	}
 
-	fmt.Printf("%+v\n", response.Greeting)
-
+	fmt.Printf("%+v\n", response.Courses)
 }

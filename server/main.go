@@ -5,30 +5,47 @@ import (
 	"log"
 	"net"
 
-	"../api"
+	"../storytel"
 	"google.golang.org/grpc"
 )
 
-// start the grpc server and wait for connection
 func main() {
+
+	fmt.Printf("%+v\n", "running server")
+
 	// listen on 7777 port
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 7777))
+	grpcAddress := fmt.Sprintf("%s:%d", "localhost", 7777)
+
+	err := startGRPCServer(grpcAddress)
 	if err != nil {
-		log.Fatalf("Failed to listen: %v", err)
+		log.Fatalf("failed to start gRPC server: %s", err)
 	}
 
-	// create server instance
-	s := api.Server{}
+}
 
-	// create grpc server object
+// starts the grpc server and waits for connection
+func startGRPCServer(address string) error {
+
+	// create a listener on TCP port
+	lis, err := net.Listen("tcp", address)
+	if err != nil {
+		return fmt.Errorf("failed to listen: %v", err)
+	}
+
+	// create a server instance
+	s := storytel.Server{}
+
+	// create a gRPC server object
 	grpcServer := grpc.NewServer()
 
-	// attach the Ping service to the server
-	api.RegisterPingServer(grpcServer, &s)
+	// attach the Courses service to the server
+	storytel.RegisterCoursesServiceServer(grpcServer, &s)
 
 	// start the server
+	log.Printf("starting gRPC server on %s", address)
 	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("Failed to serve: %s", err)
+		return fmt.Errorf("failed to serve: %s", err)
 	}
 
+	return nil
 }
